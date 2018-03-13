@@ -5637,6 +5637,17 @@ them.
     Among these kernels, ``burkes`` achieves a good balance between performance
     and quality, and probably is the one you want to try first.
 
+``--gpu-deint-shader=<mode>``
+    Enable deinterlacing in the gpu fragment shader (default: no). Requires
+    ``--vo=gpu``.
+
+    no
+        Disable deinterlacing.
+    yes
+        Enable deinterlacing of all frames.
+    auto
+        Enable deinterlacing of only frames marked as interlaced.
+
 ``--gpu-debug``
     Enables GPU debugging. What this means depends on the API type. For OpenGL,
     it calls ``glGetError()``, and requests a debug context. For Vulkan, it
