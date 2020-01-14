@@ -860,7 +860,8 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
     // operations needs it
     bool need_linear = src.transfer != dst.transfer ||
                        src.primaries != dst.primaries ||
-                       src.hdr.max_luma != dst.hdr.max_luma ||
+                       src.hdr.max_luma > dst.hdr.max_luma ||
+                       (src.hdr.max_luma != dst.hdr.max_luma && !pl_color_transfer_is_hdr(dst.transfer)) ||
                        need_ootf;
 
     if (need_linear && !is_linear) {
