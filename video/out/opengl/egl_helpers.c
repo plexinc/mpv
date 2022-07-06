@@ -101,7 +101,7 @@ static void *mpegl_get_proc_address(void *ctx, const char *name)
 }
 
 static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
-                           bool es, struct mpegl_cb cb,
+                           int es_version, struct mpegl_cb cb,
                            EGLContext *out_context, EGLConfig *out_config)
 {
     int msgl = ctx->opts.probing ? MSGL_V : MSGL_FATAL;
@@ -110,14 +110,23 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
     EGLint rend;
     const char *name;
 
-    if (!es) {
+    switch (es_version) {
+    case 0:
         api = EGL_OPENGL_API;
         rend = EGL_OPENGL_BIT;
         name = "Desktop OpenGL";
-    } else {
+        break;
+    case 2:
         api = EGL_OPENGL_ES_API;
         rend = EGL_OPENGL_ES2_BIT;
-        name = "GLES 2.x +";
+        name = "GLES 2.x";
+        break;
+    case 3:
+        api = EGL_OPENGL_ES_API;
+        rend = EGL_OPENGL_ES3_BIT;
+        name = "GLES 3.x";
+        break;
+    default: abort();
     }
 
     MP_VERBOSE(ctx, "Trying to create %s context.\n", name);
@@ -172,7 +181,7 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
     int ctx_flags = ctx->opts.debug ? EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR : 0;
     EGLContext *egl_ctx = NULL;
 
-    if (!es) {
+    if (!es_version) {
         for (int n = 0; mpgl_min_required_gl_versions[n]; n++) {
             int ver = mpgl_min_required_gl_versions[n];
 
@@ -194,8 +203,8 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
         // Fallback for EGL 1.4 without EGL_KHR_create_context or GLES
         // Add the context flags only for GLES - GL has been attempted above
         EGLint attrs[] = {
-            EGL_CONTEXT_CLIENT_VERSION, 2,
-            es ? EGL_CONTEXT_FLAGS_KHR : EGL_NONE, ctx_flags,
+            EGL_CONTEXT_CLIENT_VERSION, es_version,
+            es_version ? EGL_CONTEXT_FLAGS_KHR : EGL_NONE, ctx_flags,
             EGL_NONE
         };
 
@@ -241,12 +250,17 @@ bool mpegl_create_context_cb(struct ra_ctx *ctx, EGLDisplay display,
 
     enum gles_mode mode = ra_gl_ctx_get_glesmode(ctx);
 
+
     if ((mode == GLES_NO || mode == GLES_AUTO) &&
-        create_context(ctx, display, false, cb, out_context, out_config))
+        create_context(ctx, display, 0, cb, out_context, out_config))
         return true;
 
     if ((mode == GLES_YES || mode == GLES_AUTO) &&
-        create_context(ctx, display, true, cb, out_context, out_config))
+        create_context(ctx, display, 3, cb, out_context, out_config))
+        return true;
+
+    if ((mode == GLES_YES || mode == GLES_AUTO) &&
+        create_context(ctx, display, 2, cb, out_context, out_config))
         return true;
 
     int msgl = ctx->opts.probing ? MSGL_V : MSGL_ERR;
