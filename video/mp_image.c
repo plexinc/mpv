@@ -951,7 +951,7 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         if (params->color.primaries == PL_COLOR_PRIM_UNKNOWN)
             params->color.primaries = PL_COLOR_PRIM_BT_709;
         if (params->color.transfer == PL_COLOR_TRC_UNKNOWN)
-            params->color.transfer = PL_COLOR_TRC_SRGB;
+            params->color.transfer = PL_COLOR_TRC_BT_1886;
     } else if (forced_csp == PL_COLOR_SYSTEM_XYZ) {
         params->repr.sys = PL_COLOR_SYSTEM_XYZ;
         params->repr.levels = PL_COLOR_LEVELS_FULL;
