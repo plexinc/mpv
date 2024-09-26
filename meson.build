@@ -1069,10 +1069,8 @@ if features['dmabuf-wayland']
     sources += files('video/out/wldmabuf/ra_wldmabuf.c')
 endif
 
-x11_opt = get_option('x11').require(
-    get_option('gpl'),
-    error_message: 'the build is not GPL!',
-)
+# First check deps without requiring GPL
+x11_opt = get_option('x11')
 x11 = {
     'deps': [dependency('x11', version: '>= 1.0.0', required: x11_opt),
              dependency('xscrnsaver', version: '>= 1.0.0', required: x11_opt),
@@ -1087,10 +1085,22 @@ foreach dep: x11['deps']
         break
     endif
 endforeach
-features += {'x11': x11_deps}
+
+# Set x11-no-gpl if deprs are found
+features += {'x11-no-gpl': x11_deps}
+
+if features['x11-no-gpl']
+    dependencies += x11['deps']
+endif
+
+# Require GPL for the rest of the x11 feature
+x11_opt = get_option('x11').require(
+    get_option('gpl'),
+    error_message: 'the build is not GPL!',
+)
+features += {'x11': x11_deps and x11_opt.allowed()}
 
 if features['x11']
-    dependencies += x11['deps']
     sources += files('video/out/vo_x11.c',
                      'video/out/x11_common.c')
 endif
@@ -1435,9 +1445,9 @@ if features['vaapi-wayland']
 endif
 
 vaapi_x11 = dependency('libva-x11', version: '>= 1.1.0', required:
-    get_option('vaapi-x11').require(libva.found() and features['x11']))
+    get_option('vaapi-x11').require(libva.found() and features['x11-no-gpl']))
 features += {'vaapi-x11': vaapi_x11.found()}
-if features['vaapi-x11']
+if features['vaapi-x11'] and features['gpl']
     dependencies += vaapi_x11
     sources += files('video/out/vo_vaapi.c')
 endif
