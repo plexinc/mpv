@@ -904,10 +904,6 @@ static const m_option_t mp_opts[] = {
     {"", OPT_SUBSTRUCT(angle_opts, angle_conf)},
 #endif
 
-#if HAVE_COCOA
-    {"", OPT_SUBSTRUCT(macos_opts, macos_conf)},
-#endif
-
 #if HAVE_DRM
     {"", OPT_SUBSTRUCT(drm_opts, drm_conf)},
 #endif
