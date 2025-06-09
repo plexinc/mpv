@@ -408,8 +408,7 @@ if features['cocoa']
     dependencies += cocoa
     sources += files('osdep/language-mac.c',
                      'osdep/path-mac.m',
-                     'osdep/utils-mac.c',
-                     'osdep/mac/app_bridge.m')
+                     'osdep/utils-mac.c')
     main_fn_source = files('osdep/main-fn-mac.c')
 elif corefoundation.found()
     sources += files('osdep/utils-mac.c')
