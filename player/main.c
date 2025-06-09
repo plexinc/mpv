@@ -70,10 +70,6 @@ static const char def_config[] =
 #include "etc/builtin.conf.inc"
 ;
 
-#if HAVE_COCOA
-#include "osdep/mac/app_bridge.h"
-#endif
-
 #ifndef FULLCONFIG
 #define FULLCONFIG "(missing)\n"
 #endif
@@ -179,10 +175,6 @@ void mp_destroy(struct MPContext *mpctx)
     mp_clients_destroy(mpctx);
 
     osd_free(mpctx->osd);
-
-#if HAVE_COCOA
-    cocoa_set_input_context(NULL);
-#endif
 
     mp_input_uninit(mpctx->input);
 
@@ -300,10 +292,6 @@ struct MPContext *mp_create(void)
     mp_clients_init(mpctx);
     mpctx->osd = osd_create(mpctx->global);
 
-#if HAVE_COCOA
-    cocoa_set_input_context(mpctx->input);
-#endif
-
     char *verbose_env = getenv("MPV_VERBOSE");
     if (verbose_env)
         mpctx->opts->verbose = atoi(verbose_env);
@@ -388,11 +376,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     }
 
     MP_STATS(mpctx, "start init");
-
-#if HAVE_COCOA
-    mpv_handle *ctx = mp_new_client(mpctx->clients, "mac");
-    cocoa_set_mpv_handle(ctx);
-#endif
 
     if (opts->encode_opts->file && opts->encode_opts->file[0]) {
         mpctx->encode_lavc_ctx = encode_lavc_init(mpctx->global);
